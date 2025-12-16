@@ -1,3 +1,4 @@
+![Washing_road_of_dog preview](https://raw.githubusercontent.com/lemon198/Washing_road_of_dog/main/media/P1.png)
 第一部分：项目信息：🐾 「汪洁步道」——必备的宠物清洗神器
 
 https://blog.csdn.net/bboy_lemon/article/details/154265134?spm=1001.2014.3001.5501
