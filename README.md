@@ -52,13 +52,17 @@ AI模型: 智谱GLM-4V视觉大模型
 
 2. 本地部署
 bash
-##克隆仓库
+克隆仓库
 git clone https://github.com/lemon198/Washing_road_of_dog.git
 
-# 进入项目目录
+3.硬件制作
+
+参考purchase和hardware
+
+进入项目目录
 cd Washing_road_of_dog
 
-# 无需安装依赖，直接浏览器打开
+无需安装依赖，直接浏览器打开
  1. 打开 dog_emotion_recognition.html
  2. 配置智谱API Key
  3. 上传狗狗视频开始体验
