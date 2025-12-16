@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>狗狗情绪驱动洗脚刷子模拟器</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 900px; margin: 0 auto; }
+        .header { text-align: center; color: white; margin-bottom: 30px; }
+        .header h1 { font-size: 2.2em; margin-bottom: 10px; }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+        }
+
+        .status {
+            padding: 10px 15px;
+            border-radius: 10px;
+            margin-bottom: 16px;
+            text-align: center;
+            font-size: 14px;
+        }
+        .status.success { background: #e8f5e9; color: #388e3c; }
+        .status.error { background: #ffebee; color: #d32f2f; }
+
+        .api-setup {
+            background: #e3f2fd;
+            padding: 16px;
+            border-radius: 10px;
+            margin-bottom: 16px;
+        }
+        .api-setup h3 { color: #1976d2; margin-bottom: 8px; font-size: 16px; }
+        .api-setup p { color: #1565c0; margin-bottom: 6px; font-size: 13px; }
+        .api-setup a { color: #1976d2; text-decoration: underline; }
+
+        .input-group { display: flex; gap: 10px; margin-top: 10px; }
+        .input-group input {
+            flex: 1; padding: 10px; border: 2px solid #90caf9;
+            border-radius: 8px; font-size: 14px;
+        }
+        .input-group input:focus { outline: none; border-color: #1976d2; }
+
+        .btn-small {
+            padding: 10px 18px;
+            background: #1976d2;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13px;
+        }
+        .btn-small:hover { background: #1565c0; }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 16px;
+        }
+        .upload-area:hover { background: #f5f5f5; border-color: #764ba2; }
+        .upload-area p { margin-bottom: 4px; }
+
+        video {
+            max-width: 100%;
+            border-radius: 12px;
+            margin-top: 10px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 13px;
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 10px;
+        }
+        .btn:hover { transform: translateY(-1px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        .btn:disabled { opacity: .5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        .result { margin-top: 16px; }
+
+        .emotion-tag {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 50px;
+            margin: 8px 0;
+        }
+        .emotion-happy { background: #c8e6c9; color: #2e7d32; }
+        .emotion-calm { background: #bbdefb; color: #1565c0; }
+        .emotion-alert { background: #fff9c4; color: #f57f17; }
+        .emotion-anxious { background: #ffccbc; color: #d84315; }
+
+        .indicators {
+            display: flex; flex-wrap: wrap;
+            gap: 8px; margin: 10px 0;
+        }
+        .indicator {
+            background: #f3e5f5; color: #7b1fa2;
+            padding: 6px 12px; border-radius: 20px; font-size: 12px;
+        }
+        .description {
+            line-height: 1.6; color: #555;
+            margin-top: 10px; font-size: 14px;
+        }
+
+        .chart-container {
+            margin-top: 20px;
+            padding: 16px;
+            background: #f9f9f9;
+            border-radius: 10px;
+        }
+        .chart-title {
+            font-size: 15px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .bar-chart { margin-bottom: 14px; }
+        .bar-item { margin-bottom: 10px; }
+        .bar-label {
+            display: flex; justify-content: space-between;
+            margin-bottom: 4px; font-size: 12px; color: #555;
+        }
+        .bar-bg {
+            height: 20px; background: #e0e0e0;
+            border-radius: 15px; overflow: hidden;
+        }
+        .bar-fill {
+            height: 100%; border-radius: 15px;
+            transition: width .8s ease;
+            display: flex; align-items: center; justify-content: flex-end;
+            padding-right: 8px; color: white; font-weight: bold; font-size: 11px;
+        }
+
+        .pie-chart {
+            width: 260px; height: 260px;
+            margin: 0 auto; position: relative;
+        }
+        .pie-legend {
+            display: flex; flex-wrap: wrap;
+            gap: 10px; justify-content: center;
+            margin-top: 10px;
+        }
+        .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; }
+        .legend-color { width: 14px; height: 14px; border-radius: 4px; }
+
+        .control-row { display: flex; gap: 10px; margin-bottom: 10px; }
+        .control-row .btn-small { flex: 1; text-align: center; }
+        .video-upload-block { margin-bottom: 10px; }
+
+        /* 当前分析画面 + 右侧刷子模拟与状态 */
+        .video-sim-row {
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        .frame-panel { flex: 1 1 45%; min-width: 220px; }
+        .frame-panel img {
+            width: 100%; border-radius: 12px;
+            border: 1px solid #e0e0e0; background: #fafafa;
+        }
+        .simulator-column { flex: 1 1 45%; min-width: 230px; }
+
+        .simulator {
+            margin-top: 8px; padding: 12px;
+            border-radius: 10px;
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            display: flex; align-items: center;
+            gap: 14px; flex-wrap: wrap;
+        }
+        .sim-title { font-weight: bold; font-size: 14px; margin-bottom: 4px; }
+        .brush-wrapper {
+            display: flex; flex-direction: column;
+            align-items: center; gap: 6px;
+        }
+
+        /* 电机+刷子+狗脚区域 */
+        .motor-assembly {
+            position: relative;
+            width: 200px;
+            height: 130px;
+        }
+
+        /* 电机机身 */
+        .motor-body {
+            position: absolute;
+            left: 10px;
+            top: 40px;
+            width: 70px;
+            height: 50px;
+            border-radius: 10px;
+            background: linear-gradient(145deg, #9e9e9e, #bdbdbd);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        /* 固定连杆 */
+        .motor-shaft {
+            position: absolute;
+            left: 80px;
+            top: 62px;
+            width: 45px;
+            height: 4px;
+            background: #cfd8dc;
+            border-radius: 4px;
+        }
+
+        /* ✅ 刷子：和连杆在同一条水平线上，紧接在连杆右侧 */
+        .brush-head {
+            position: absolute;
+            left: 125px;          /* 刚好接在连杆右端 */
+            top: 48px;            /* 调高一点，让中心基本和连杆一条水平线 */
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 6px solid #ddd;
+            border-top-color: #667eea;
+            border-right-color: #764ba2;
+            background: #fafafa;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transform-origin: 50% 50%;
+            z-index: 1;           /* 在狗脚下面 */
+        }
+
+        /* ✅ 狗腿：对齐到狗脚中心上方，看起来是同一条腿伸下来 */
+        .dog-leg {
+            position: absolute;
+            left: 142px;          /* 大致和狗脚中心对齐 */
+            top: -2px;            /* 再往上提一点，让腿和脚自然衔接 */
+            width: 16px;
+            height: 40px;
+            background: #ffcc80;
+            border-radius: 10px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+            z-index: 2;
+        }
+
+        /* ✅ 狗脚：整体在刷子上方，不和刷子重叠 */
+        .dog-paw {
+            position: absolute;
+            left: 120px;          /* 基本居中在刷子上面 */
+            top: 14px;            /* 和刷子之间留一点距离，像垫在刷子上方 */
+            width: 52px;
+            height: 34px;
+            background: #ffb74d;
+            border-radius: 60% 60% 45% 45%;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+            z-index: 3;           /* 在刷头之上 */
+        }
+        /* 大肉垫 */
+        .dog-paw::before {
+            content: "";
+            position: absolute;
+            left: 12px;
+            top: 10px;
+            width: 28px;
+            height: 18px;
+            background: #ffe0b2;
+            border-radius: 70% 70% 60% 60%;
+        }
+        
+
+        /* 标注文字统一样式保持不变 */
+        .part-label {
+            position: absolute;
+            padding: 2px 6px;
+            font-size: 10px;
+            background: rgba(255,255,255,0.9);
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            color: #333;
+            white-space: nowrap;
+        }
+
+        /* 电机标注 */
+        .label-motor { left: 28px; top: 20px; }
+        /* 连杆标注 */
+        .label-shaft { left: 85px; top: 40px; }
+        /* ✅ 刷子标注：刷子正下方 */
+        .label-brush {
+            left: 130px;
+            top: 90px;
+        }
+        /* ✅ 狗脚标注：狗脚右侧居中 */
+        .label-paw {
+            left: 180px;
+            top: 26px;
+        }
+
+
+        .speed-display { font-size: 13px; color: #444; }
+        .speed-bar-outer { flex: 1; min-width: 160px; }
+        .speed-bar-bg {
+            height: 12px; background: #e0e0e0;
+            border-radius: 999px; overflow: hidden;
+        }
+        .speed-bar-fill {
+            height: 100%; width: 0%;
+            border-radius: 999px;
+            background: linear-gradient(90deg, #66bb6a, #ffca28, #ff7043);
+            transition: width .3s ease;
+        }
+        .speed-bar-label { font-size: 12px; color: #777; margin-top: 4px; }
+
+        .emotion-state-panel {
+            margin-top: 8px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            background: #f5f5f5;
+            font-size: 12px;
+        }
+        .state-pill {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            margin: 4px 0;
+        }
+        .state-normal   { background: #e3f2fd; color: #1565c0; }
+        .state-relaxed  { background: #e8f5e9; color: #2e7d32; }
+        .state-abnormal { background: #ffebee; color: #c62828; }
+        .state-desc { margin-top: 2px; color: #666; line-height: 1.4; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🐕 狗狗情绪驱动洗脚刷子模拟器</h1>
+        <p>GLM-4V 分析狗狗情绪 · 模拟刷子转速变化</p>
+    </div>
+
+    <div class="card">
+        <!-- API Key 设置 -->
+        <div id="apiSetup" class="api-setup">
+            <h3>🔑 设置 API Key</h3>
+            <p>需要智谱 AI 的 API Key 才能使用（新用户有免费额度）</p>
+            <p>👉 <a href="https://open.bigmodel.cn/" target="_blank">点击这里注册并获取 API Key</a></p>
+            <div class="input-group">
+                <input type="password" id="apiKeyInput" placeholder="请输入你的 API Key..." />
+                <button class="btn-small" onclick="saveApiKey()">保存</button>
+            </div>
+        </div>
+        <div id="apiStatus" style="display:none;"></div>
+
+        <!-- 视频上传 -->
+        <div class="video-upload-block">
+            <div id="videoUploadArea" class="upload-area" onclick="document.getElementById('videoInput').click()">
+                <input type="file" id="videoInput" accept="video/*" style="display:none;" onchange="handleVideoUpload(event)">
+                <div id="videoUploadContent">
+                    <p style="font-size: 32px;">🎬</p>
+                    <p style="font-size: 16px; color: #444;">点击上传狗狗视频</p>
+                    <p style="font-size: 13px; color: #888;">建议包含狗狗脸部和上半身 · 支持 MP4 等常见格式</p>
+                </div>
+                <video id="previewVideo" controls style="display:none;"></video>
+            </div>
+        </div>
+
+        <!-- 控制按钮 -->
+        <div class="control-row">
+            <button class="btn-small" id="startVideoBtn" onclick="startVideoAnalysis()" disabled>开始视频情绪驱动模拟</button>
+            <button class="btn-small" id="stopVideoBtn" onclick="stopVideoAnalysis()" disabled style="background:#9e9e9e;">停止</button>
+        </div>
+
+        <!-- 单张画面分析按钮 -->
+        <button id="analyzeBtn" class="btn" onclick="analyzeEmotion()" disabled>
+            对当前画面单次分析
+        </button>
+
+        <!-- 结果显示 -->
+        <div id="result" class="result" style="display:none;">
+            <h2 style="font-size:18px; margin-bottom:8px;">最新一次分析结果</h2>
+            <div id="emotionDisplay"></div>
+            <div id="confidenceDisplay" style="font-size:13px; color:#555; margin-top:4px;"></div>
+            <div id="indicatorsDisplay"></div>
+            <div id="descriptionDisplay"></div>
+
+            <!-- 当前分析画面 + 右侧刷子模拟与状态 -->
+            <div class="video-sim-row">
+                <div class="frame-panel">
+                    <div class="sim-title">🎞 当前分析画面</div>
+                    <img id="analyzedFrame" alt="当前分析帧" />
+                </div>
+                <div class="simulator-column">
+                    <div class="sim-title">🌀 洗脚刷子模拟 & 情绪状态</div>
+                    <div class="simulator">
+                        <div class="brush-wrapper">
+                            <div class="motor-assembly">
+                                <div class="motor-body"></div>
+                                <div class="motor-shaft"></div>
+                                <div class="brush-head" id="brushHead"></div>
+                                <div class="dog-leg"></div>
+                                <div class="dog-paw"></div>
+
+                                <!-- 标注 -->
+                                <div class="part-label label-motor">电机</div>
+                                <div class="part-label label-shaft">连杆</div>
+                                <div class="part-label label-brush">刷子</div>
+                                <div class="part-label label-paw">狗脚</div>
+                            </div>
+                            <div class="speed-display">
+                                当前转速：<span id="speedLabel">0</span> / 100
+                            </div>
+                        </div>
+                        <div class="speed-bar-outer">
+                            <div class="sim-title" style="margin-bottom:4px;">转速可视化</div>
+                            <div class="speed-bar-bg">
+                                <div class="speed-bar-fill" id="speedBarFill"></div>
+                            </div>
+                            <div class="speed-bar-label">
+                                情绪异常时会减速 · 情绪放松/正常时会加速到舒适区间
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="emotion-state-panel">
+                        <div class="sim-title">当前情绪状态</div>
+                        <div id="statePill" class="state-pill state-normal">未识别</div>
+                        <div id="stateDesc" class="state-desc">等待分析结果…</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 图表 -->
+            <div class="chart-container">
+                <div class="chart-title">📊 情绪分布分析</div>
+                <div class="bar-chart" id="barChart"></div>
+                
+                <div class="chart-title" style="margin-top: 12px;">🥧 情绪占比图</div>
+                <canvas id="pieChart" class="pie-chart" width="260" height="260"></canvas>
+                <div class="pie-legend" id="pieLegend"></div>
+            </div>
+        </div> <!-- result -->
+    </div> <!-- card -->
+</div> <!-- container -->
+
+<script>
+    let apiKey = '';
+    let currentImage = null;
+    let videoElement = null;
+    let videoAnalysisTimer = null;
+    let isAnalyzingFrame = false;
+
+    let captureCanvas = null;
+    let captureCtx = null;
+
+    // 转速与状态
+    let currentSpeed = 0;        // 实际显示的速度
+    let targetSpeed = 0;         // 情绪计算出的目标速度
+    let currentEmotionState = 'idle'; // 'normal' | 'relaxed' | 'abnormal' | 'idle'
+
+    // 旋转角度 & 时间，用 JS 模拟真实加减速旋转
+    let angle = 0;               // 当前旋转角度（弧度）
+    let lastTimestamp = null;    // 上一帧时间戳
+
+    window.onload = function() {
+        const stored = localStorage.getItem('glm_api_key');
+        if (stored) {
+            apiKey = stored;
+            document.getElementById('apiSetup').style.display = 'none';
+            const status = document.getElementById('apiStatus');
+            status.style.display = 'block';
+            status.className = 'status success';
+            status.innerHTML = '✓ 已从本地加载 API Key <button class="btn-small" onclick="resetApiKey()" style="margin-left: 8px; padding: 4px 10px; font-size: 11px;">修改</button>';
+        }
+
+        videoElement = document.getElementById('previewVideo');
+
+        captureCanvas = document.createElement('canvas');
+        captureCtx = captureCanvas.getContext('2d');
+
+        // 启动持续动画循环，平滑逼近 targetSpeed + 控制刷头旋转角度
+        requestAnimationFrame(animateSpeed);
+    };
+
+    function saveApiKey() {
+        const key = document.getElementById('apiKeyInput').value.trim();
+        if (!key) { alert('请输入 API Key'); return; }
+        apiKey = key;
+        localStorage.setItem('glm_api_key', key);
+
+        document.getElementById('apiSetup').style.display = 'none';
+        const status = document.getElementById('apiStatus');
+        status.style.display = 'block';
+        status.className = 'status success';
+        status.innerHTML = '✓ API Key 已保存 <button class="btn-small" onclick="resetApiKey()" style="margin-left: 8px; padding: 4px 10px; font-size: 11px;">修改</button>';
+    }
+
+    function resetApiKey() {
+        apiKey = '';
+        localStorage.removeItem('glm_api_key');
+        document.getElementById('apiSetup').style.display = 'block';
+        document.getElementById('apiStatus').style.display = 'none';
+        document.getElementById('apiKeyInput').value = '';
+    }
+
+    function handleVideoUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const url = URL.createObjectURL(file);
+        videoElement.src = url;
+        videoElement.style.display = 'block';
+        document.getElementById('videoUploadContent').style.display = 'none';
+
+        videoElement.onloadedmetadata = function() {
+            videoElement.play();
+            document.getElementById('startVideoBtn').disabled = false;
+            document.getElementById('analyzeBtn').disabled = false;
+        };
+    }
+
+    function captureFrameFromVideo() {
+        if (!videoElement || videoElement.readyState < 2) return null;
+        const w = videoElement.videoWidth;
+        const h = videoElement.videoHeight;
+        if (!w || !h) return null;
+
+        captureCanvas.width = w;
+        captureCanvas.height = h;
+        captureCtx.drawImage(videoElement, 0, 0, w, h);
+        return captureCanvas.toDataURL('image/jpeg');
+    }
+
+    async function analyzeEmotion() {
+        if (!apiKey) { alert('请先设置 API Key'); return; }
+
+        let imageDataUrl = null;
+        if (videoElement && !videoElement.paused && !videoElement.ended) {
+            imageDataUrl = captureFrameFromVideo();
+        } else if (currentImage) {
+            imageDataUrl = currentImage;
+        }
+
+        if (!imageDataUrl) {
+            alert('没有可用画面，请先播放视频或上传图片');
+            return;
+        }
+
+        document.getElementById('analyzeBtn').disabled = true;
+        document.getElementById('analyzeBtn').textContent = '分析中...';
+
+        try {
+            await analyzeEmotionFromImage(imageDataUrl);
+        } catch (e) {
+            console.error(e);
+        } finally {
+            document.getElementById('analyzeBtn').disabled = false;
+            document.getElementById('analyzeBtn').textContent = '对当前画面单次分析';
+        }
+    }
+
+    async function analyzeEmotionFromImage(imageDataUrl) {
+        if (!apiKey) throw new Error('API Key 未设置');
+
+        try {
+            const response = await fetch('https://open.bigmodel.cn/api/paas/v4/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': apiKey
+                },
+                body: JSON.stringify({
+                    model: 'glm-4v-flash',
+                    messages: [{
+                        role: 'user',
+                        content: [
+                            { type: 'image_url', image_url: { url: imageDataUrl } },
+                            {
+                                type: 'text',
+                                text: `请分析这张照片中狗狗的情绪状态，并以 JSON 格式返回结果（不要使用 markdown 代码块格式）：
+
+{
+  "mainEmotion": "主要情绪（从以下选择：快乐兴奋、放松平静、好奇警觉、焦虑紧张、顽皮爱玩、专注投入、疲倦困乏、友好亲近）",
+  "confidence": "置信度（高/中/低）",
+  "indicators": ["情绪指标1", "情绪指标2", "情绪指标3"],
+  "description": "详细的情绪分析描述（50-100字）",
+  "emotionScores": {
+    "快乐兴奋": 数值(0-100),
+    "放松平静": 数值(0-100),
+    "好奇警觉": 数值(0-100),
+    "焦虑紧张": 数值(0-100),
+    "顽皮爱玩": 数值(0-100),
+    "专注投入": 数值(0-100),
+    "疲倦困乏": 数值(0-100),
+    "友好亲近": 数值(0-100)
+  }
+}
+
+请确保 emotionScores 中所有数值加起来等于 100。`
+                            }
+                        ]
+                    }]
+                })
+            });
+
+            const data = await response.json();
+            console.log('API 响应:', data);
+
+            if (data.error) throw new Error(data.error.message || 'API 调用失败');
+            if (!response.ok) throw new Error(`HTTP ${response.status}: ${data.message || '请求失败'}`);
+
+            let resultText = data.choices[0].message.content;
+            resultText = resultText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+
+            const result = JSON.parse(resultText);
+
+            const frameImg = document.getElementById('analyzedFrame');
+            if (frameImg) frameImg.src = imageDataUrl;
+
+            displayResult(result);
+        } catch (error) {
+            console.error('分析错误:', error);
+            const status = document.getElementById('apiStatus');
+            status.style.display = 'block';
+            status.className = 'status error';
+            status.innerHTML = '❌ 分析失败: ' + error.message + '<br><small>请检查 API Key 是否正确，或者是否还有免费额度</small>';
+            throw error;
+        }
+    }
+
+    function startVideoAnalysis() {
+        if (!apiKey) { alert('请先设置 API Key'); return; }
+        if (!videoElement || !videoElement.src) {
+            alert('请先上传并播放狗狗视频');
+            return;
+        }
+
+        if (videoAnalysisTimer) clearInterval(videoAnalysisTimer);
+
+        document.getElementById('startVideoBtn').disabled = true;
+        document.getElementById('stopVideoBtn').disabled = false;
+
+        const intervalMs = 4000;
+
+        videoAnalysisTimer = setInterval(async () => {
+            if (!videoElement || videoElement.ended) {
+                stopVideoAnalysis(); return;
+            }
+            if (isAnalyzingFrame) return;
+
+            const frame = captureFrameFromVideo();
+            if (!frame) return;
+
+            isAnalyzingFrame = true;
+            try {
+                await analyzeEmotionFromImage(frame);
+            } catch (e) {
+                console.error(e);
+            } finally {
+                isAnalyzingFrame = false;
+            }
+        }, intervalMs);
+    }
+
+    function stopVideoAnalysis() {
+        if (videoAnalysisTimer) {
+            clearInterval(videoAnalysisTimer);
+            videoAnalysisTimer = null;
+        }
+        document.getElementById('startVideoBtn').disabled = false;
+        document.getElementById('stopVideoBtn').disabled = true;
+    }
+
+    function displayResult(result) {
+        const emotionColors = {
+            "快乐兴奋": "emotion-happy",
+            "放松平静": "emotion-calm",
+            "好奇警觉": "emotion-alert",
+            "焦虑紧张": "emotion-anxious",
+            "顽皮爱玩": "emotion-happy",
+            "专注投入": "emotion-calm",
+            "疲倦困乏": "emotion-calm",
+            "友好亲近": "emotion-happy"
+        };
+
+        const mainEmotion = result.mainEmotion || '未知';
+        const emotionClass = emotionColors[mainEmotion] || 'emotion-calm';
+
+        document.getElementById('emotionDisplay').innerHTML =
+            '<div class="emotion-tag ' + emotionClass + '">' + mainEmotion + '</div>';
+
+        document.getElementById('confidenceDisplay').innerHTML =
+            '<p><strong>置信度：</strong>' + (result.confidence || '未知') + '</p>';
+
+        let indicatorsHtml = '<p><strong>情绪指标：</strong></p><div class="indicators">';
+        (result.indicators || []).forEach(indicator => {
+            indicatorsHtml += '<span class="indicator">' + indicator + '</span>';
+        });
+        indicatorsHtml += '</div>';
+        document.getElementById('indicatorsDisplay').innerHTML = indicatorsHtml;
+
+        document.getElementById('descriptionDisplay').innerHTML =
+            '<p class="description"><strong>详细分析：</strong><br>' + (result.description || '') + '</p>';
+
+        drawBarChart(result.emotionScores || {});
+        drawPieChart(result.emotionScores || {});
+
+        targetSpeed = computeTargetSpeed(result);
+        updateEmotionStateUI();
+
+        document.getElementById('result').style.display = 'block';
+    }
+
+    function drawBarChart(scores) {
+        const colors = {
+            "快乐兴奋": "#66bb6a",
+            "放松平静": "#42a5f5",
+            "好奇警觉": "#ffca28",
+            "焦虑紧张": "#ff7043",
+            "顽皮爱玩": "#9ccc65",
+            "专注投入": "#26c6da",
+            "疲倦困乏": "#78909c",
+            "友好亲近": "#ab47bc"
+        };
+
+        const entries = Object.entries(scores);
+        if (!entries.length) {
+            document.getElementById('barChart').innerHTML =
+                '<p style="font-size:12px;color:#888;">暂无情绪分布数据</p>';
+            return;
+        }
+
+        const sortedScores = entries.sort((a, b) => b[1] - a[1]);
+        let html = '';
+        sortedScores.forEach(([emotion, score]) => {
+            const v = Number(score) || 0;
+            html += `
+                <div class="bar-item">
+                    <div class="bar-label">
+                        <span>${emotion}</span>
+                        <span>${v.toFixed(1)}%</span>
+                    </div>
+                    <div class="bar-bg">
+                        <div class="bar-fill" style="width:${v}%;background:${colors[emotion] || '#888'};"></div>
+                    </div>
+                </div>`;
+        });
+        document.getElementById('barChart').innerHTML = html;
+    }
+
+    function drawPieChart(scores) {
+        const canvas = document.getElementById('pieChart');
+        const ctx = canvas.getContext('2d');
+        const centerX = canvas.width / 2;
+               const centerY = canvas.height / 2;
+        const radius = Math.min(centerX, centerY) - 5;
+
+        const colors = {
+            "快乐兴奋": "#66bb6a",
+            "放松平静": "#42a5f5",
+            "好奇警觉": "#ffca28",
+            "焦虑紧张": "#ff7043",
+            "顽皮爱玩": "#9ccc65",
+            "专注投入": "#26c6da",
+            "疲倦困乏": "#78909c",
+            "友好亲近": "#ab47bc"
+        };
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        const entries = Object.entries(scores);
+        if (!entries.length) {
+            document.getElementById('pieLegend').innerHTML =
+                '<p style="font-size:12px;color:#888;">暂无情绪占比数据</p>';
+            return;
+        }
+
+        let startAngle = -Math.PI / 2;
+        const sortedScores = entries.sort((a, b) => b[1] - a[1]);
+
+        sortedScores.forEach(([emotion, score]) => {
+            const v = Number(score) || 0;
+            const sliceAngle = (v / 100) * 2 * Math.PI;
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY);
+            ctx.arc(centerX, centerY, radius, startAngle, startAngle + sliceAngle);
+            ctx.closePath();
+            ctx.fillStyle = colors[emotion] || '#888';
+            ctx.fill();
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+            startAngle += sliceAngle;
+        });
+
+        let legendHtml = '';
+        sortedScores.forEach(([emotion, score]) => {
+            const v = Number(score) || 0;
+            legendHtml += `
+                <div class="legend-item">
+                    <div class="legend-color" style="background:${colors[emotion] || '#888'};"></div>
+                    <span>${emotion} (${v.toFixed(1)}%)</span>
+                </div>`;
+        });
+        document.getElementById('pieLegend').innerHTML = legendHtml;
+    }
+
+    function computeTargetSpeed(result) {
+        const scores = result.emotionScores || {};
+        const main = result.mainEmotion || '';
+
+        const S_MIN = 20;
+        const S_COMFORT = 60;
+        const S_MAX = 80;
+
+        let state = 'normal';
+        if (['焦虑紧张', '好奇警觉'].includes(main)) {
+            state = 'abnormal';
+        } else if (['放松平静', '友好亲近', '疲倦困乏'].includes(main)) {
+            state = 'relaxed';
+        } else {
+            state = 'normal';
+        }
+
+        const anxiousScore = (scores['焦虑紧张'] || 0) + (scores['好奇警觉'] || 0);
+        const relaxScore   = (scores['放松平静'] || 0) + (scores['友好亲近'] || 0);
+
+        if (anxiousScore > 30) {
+            state = 'abnormal';
+        } else if (relaxScore > 60) {
+            state = 'relaxed';
+        }
+
+        let target;
+        if (state === 'abnormal') {
+            target = S_MIN;
+            if (anxiousScore > 50) target = Math.max(10, S_MIN - 5);
+        } else if (state === 'relaxed') {
+            target = S_COMFORT + 10;
+            if (relaxScore > 80) target = Math.min(S_MAX, target + 5);
+        } else {
+            target = S_COMFORT;
+        }
+
+        currentEmotionState = state;
+        target = Math.max(0, Math.min(100, target));
+        return target;
+    }
+
+    function updateEmotionStateUI() {
+        const pill = document.getElementById('statePill');
+        const desc = document.getElementById('stateDesc');
+        if (!pill || !desc) return;
+
+        let cls = 'state-normal';
+        let text = '正常';
+        let descText = '情绪整体稳定，可以以舒适速度清洁。';
+
+        if (currentEmotionState === 'relaxed') {
+            cls = 'state-relaxed';
+            text = '放松';
+            descText = '狗狗整体放松友好，可以略微提升刷子转速提高清洁效率。';
+        } else if (currentEmotionState === 'abnormal') {
+            cls = 'state-abnormal';
+            text = '情绪异常';
+            descText = '检测到较强的紧张/警觉，应减慢刷子转速，帮助狗狗安抚情绪。';
+        } else if (currentEmotionState === 'idle') {
+            cls = 'state-normal';
+            text = '未识别';
+            descText = '等待分析结果…';
+        }
+
+        pill.className = 'state-pill ' + cls;
+        pill.textContent = text;
+        desc.textContent = descText;
+    }
+
+    function animateSpeed(timestamp) {
+        if (!lastTimestamp) lastTimestamp = timestamp;
+        const dt = (timestamp - lastTimestamp) / 1000; // 秒
+        lastTimestamp = timestamp;
+
+        const alpha = 0.015; // 缓慢加减速
+        currentSpeed = currentSpeed + alpha * (targetSpeed - currentSpeed);
+        const clamped = Math.max(0, Math.min(100, currentSpeed));
+
+        const minOmega = Math.PI;      // 最慢：约 0.5 圈/s
+        const maxOmega = 6 * Math.PI;  // 最快：约 3 圈/s
+        const ratio = clamped / 100;
+        const omega = minOmega + ratio * (maxOmega - minOmega);
+
+        angle += omega * dt;
+
+        applySpeedToBrush(clamped, angle);
+        requestAnimationFrame(animateSpeed);
+    }
+
+    function applySpeedToBrush(speed, angleRad) {
+        const brush = document.getElementById('brushHead');
+        const label = document.getElementById('speedLabel');
+        const barFill = document.getElementById('speedBarFill');
+        if (!brush || !label || !barFill) return;
+
+        const clamped = Math.max(0, Math.min(100, speed));
+        label.textContent = clamped.toFixed(1);
+        barFill.style.width = clamped.toFixed(1) + '%';
+
+        // 只让刷头自己在脚底下原地旋转
+        brush.style.transform = `rotate(${angleRad}rad)`;
+    }
+</script>
+</body>
+</html>
+
