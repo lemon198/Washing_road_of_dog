@@ -55,7 +55,7 @@ AI模型: 智谱GLM-4V视觉大模型
  克隆仓库
  git clone https://github.com/lemon198/Washing_road_of_dog.git
 
-   3.硬件制作:参考purchase和hardware
+    3.硬件制作:参考purchase和hardware
 
  无需安装依赖，直接浏览器打开
  （1）打开 dog_emotion_recognition.html
