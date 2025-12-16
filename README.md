@@ -52,7 +52,7 @@ AI模型: 智谱GLM-4V视觉大模型
 
 2. 本地部署
 bash
-# 克隆仓库
+##克隆仓库
 git clone https://github.com/lemon198/Washing_road_of_dog.git
 
 # 进入项目目录
