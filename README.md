@@ -55,19 +55,15 @@ bash
 克隆仓库
 git clone https://github.com/lemon198/Washing_road_of_dog.git
 
-3.硬件制作
+3.硬件制作:参考purchase和hardware
 
-参考purchase和hardware
-
-进入项目目录
-cd Washing_road_of_dog
-
+bash'''
 无需安装依赖，直接浏览器打开
  1. 打开 dog_emotion_recognition.html
  2. 配置智谱API Key
  3. 上传狗狗视频开始体验
  4. API配置
-访问智谱AI开放平台申请API Key
+访问智谱AI开放平台申请API Key'''
 
 在页面设置中输入API Key
 
